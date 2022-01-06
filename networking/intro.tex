@@ -1,0 +1,20 @@
+\section{Introduction}
+
+
+Virtualization technology is the cornerstone of today's network infrastructure. There are countless servers running in a large data center, and the vast majority of them are in the form of virtual machines. Compared to traditional bare-metal servers, these virtual machines are highly available, easy to maintain, and fast to migrate, offering more possibilities for today's rapidly changing Internet applications. More and more small and medium-sized businesses are digitizing their applications, and even some Internet giants with several large, globally distributed network centers, including Google, Amazon, and Meta (formerly Facebook), are reaping the convenience and profits of virtualization technology. Virtualization technologies are at the heart and forerunners of today's red-hot cloud computing, Serverless, SaaS, containerization and other technologies. These technologies are deconstructing the hardware architecture of the computer itself to build flexible, agile and efficient applications in a more abstract way.
+
+The development of virtualization technology itself has not been a breeze. Old hardware designs, such as interrupts, CPU privilege levels, and I/O devices and storage hardware based on them, did not take into account the needs of virtualization. As a result, a range of virtualization technologies and applications were proposed, and smoothing out the performance differences between virtual and physical machines became the main development direction for virtualization technology. Among I/O devices, network devices, with their importance in the Internet infrastructure, and the high requirements for data throughput, latency, and parallelization, are one of the focuses of research in virtualization technology today.
+
+QEMU and KVM-based virtual machines occupy a larger market share of open source virtualization solutions and are not inferior to commercial virtualization solutions because they do not require modification of the client system kernel compared to Xen. QEMU provides a software-level virtualization solution, while KVM serves as a high-performance interface to interact with the Linux kernel, providing high performance memory and CPU virtualization support.
+
+In the virtualization of the NIC, QEMU offers both virtio and e1000 models. virtio collaborates with the client itself to optimize the transmission of network data in a para-virtualized form. e1000, on the other hand, emulates an Intel PCI NIC in a fully virtualized form. Clearly there is a high performance difference between the two, and the content of this report is to compare and explore these two NIC models used in virtualization.
+
+\subsection*{Description}
+
+In this report, we compare the specific performance of both e1000 and virtio NICs.
+
+In order to fully compare the performance difference between the two, in addition to the comparison of TAP mode connections, we also compared the transfer efficiency within the virtual LAN with the inter-network.
+
+\subsection*{Results}
+
+In this project, we created VMs with QEMU and compared the performance of e1000 and virtio implementations. Experiments show that although neither virtualized NICs can achieve the performance of a real NIC, the virtio clearly has better performance compared to the e1000 in virtualized NICs.

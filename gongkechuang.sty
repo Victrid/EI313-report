@@ -1,0 +1,85 @@
+\usepackage{graphicx}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{listings}
+\usepackage[hidelinks]{hyperref}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{amssymb} 
+\usepackage{appendix}
+\usepackage{lipsum} 
+\usepackage{xparse}
+\usepackage{multirow}
+\usepackage{xcolor}
+\newcommand\crule[3][black]{\textcolor{#1}{\rule{#2}{#3}}}
+\usepackage{import}
+
+\definecolor{codegreen}{rgb}{0,0.6,0} 
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{gkcstyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\lstset{style=gkcstyle}
+
+% Lorem Ipsum
+\unpacklipsum[1-100]
+
+\ExplSyntaxOn
+% unpack \lipsumexp
+\seq_new:N \g_lipsum_sentences_seq
+\cs_generate_variant:Nn \seq_set_split:Nnn { NnV }
+\seq_gset_split:NnV \g_lipsum_sentences_seq {.~} \lipsumexp
+
+\NewDocumentCommand{\lipsumsentence}{>{\SplitArgument{1}{-}}O{1-7}}
+ {
+  \lipsumsentenceaux #1
+ }
+\NewDocumentCommand{\lipsumsentenceaux}{mm}
+ {
+  \IfNoValueTF { #2 }
+   {
+    \seq_item:Nn \g_lipsum_sentences_seq { #1 }.~
+   }
+   {
+    \int_step_inline:nnnn { #1 } { 1 } { #2 }
+     {
+      \seq_item:Nn \g_lipsum_sentences_seq { ##1 }.~
+     }
+   }
+ }
+\ExplSyntaxOff
+
+\renewcommand{\lstlistingname}{Code Segment}
+\renewcommand{\lstlistlistingname}{\lstlistingname \, Index}
+\renewcommand{\listfigurename}{Figure Index}
+\renewcommand{\listtablename}{Table Index}
+
+\renewcommand{\tablename}{Table}
+ 
+\renewcommand{\figurename}{Figure}
+\renewcommand{\contentsname}{Contents}
+
+\author{github.com/Victrid}
+\date{}
+
+\graphicspath{{figures/}}

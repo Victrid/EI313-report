@@ -1,0 +1,87 @@
+\section{Experiment and Analysis}
+
+Devices that TAP to the Linux bridge perform NAT translation at the bridge boundary.
+NAT conversion consumes some time, and HOP between different network interfaces can lead to different delay test results.
+
+Figure \ref{fig:ns} is a schematic diagram of the structure of our network.
+
+\begin{figure}[ht]
+    \centering
+    \def\svgwidth{0.95\textwidth}
+    \import{images}{network.pdf_tex}
+    \caption{Network Structure}
+    \label{fig:ns}
+\end{figure}
+
+\subsection{Delay test}
+
+Ping is a better tool to measure latency. We used the following command to perform the delay test.
+
+\texttt{ping -c 20 <Hostname>}
+
+Our test conditions are: two virtual machines testing each other; the host for virtual machines, listening to the bridge and host interfaces respectively; the router before going to the last HOP of the Internet; the DNS server of SJTU, and a server located in Tokyo, Japan.
+
+To demonstrate the performance, we also show the results for the hosts. The results are shown in table \ref{tbl:ping}.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{cc|cccc}
+\hline
+Host                    & Destination    & Minimum          & Average          & Maximum          & Jitter         \\ \hline
+\multirow{6}{*}{virtio} & Peer VM        & 0.358            & 0.646            & \textbf{1.278}   & \textbf{0.232} \\
+                        & Virtual Bridge & \textbf{0.130}   & \textbf{0.224}   & \textbf{0.523}   & \textbf{0.089} \\
+                        & Host Interface & \textbf{0.123}   & \textbf{0.251}   & 0.790            & 0.150          \\
+                        & Router         & \textbf{1.316}   & \textbf{2.018}   & \textbf{3.457}   & \textbf{0.490} \\
+                        & SJTU DNS       & 1.628            & \textbf{2.403}   & 4.771            & 0.741          \\
+                        & Tokyo          & \textbf{112.162} & 118.960          & 143.659          & 7.786          \\ \hline
+\multirow{6}{*}{e1000}  & Peer VM        & \textbf{0.312}   & \textbf{0.601}   & 1.468            & 0.293          \\
+                        & Virtual Bridge & 0.193            & 0.428            & 0.722            & 0.164          \\
+                        & Host Interface & 0.238            & 0.416            & \textbf{0.611}   & \textbf{0.098} \\
+                        & Router         & 1.322            & 2.125            & 4.458            & 0.804          \\
+                        & SJTU DNS       & \textbf{1.626}   & 2.583            & \textbf{3.816}   & \textbf{0.559} \\
+                        & Tokyo          & 112.406          & \textbf{118.853} & \textbf{133.535} & \textbf{7.426} \\ \hline
+\multirow{7}{*}{Host}   & e1000          & 0.174            & 0.273            & 0.498            & 0.088          \\
+                        & virtio         & 0.215            & 0.376            & 0.575            & 0.102          \\
+                        & Virtual Bridge & 0.035            & 0.067            & 0.271            & 0.051          \\
+                        & Host Interface & 0.033            & 0.064            & 0.198            & 0.040          \\
+                        & Router         & 1.019            & 1.675            & 2.483            & 0.442          \\
+                        & SJTU DNS       & 1.414            & 2.233            & 3.552            & 0.599          \\
+                        & Tokyo          & 112.597          & 123.075          & 159.365          & 11.935         \\ \hline
+\end{tabular}
+\caption{Ping test results}\label{tbl:ping}
+\end{table}
+
+In Table \ref{tbl:ping}, we can see that both have poorer performance compared to the host NIC (most of this difference should be attributed to the difference in NAT translation and HOP count), but the difference in performance between the two themselves is small. virtio is slightly better in performance.
+
+\subsection{Bandwidth test}
+
+Bandwidth performance tests are performed using iperf. iperf is a common test tool for network configuration. Given that we could not start a TCP test server from the SJTU DNS server, thanks to the resources provided by the course, we used a cloud host created on jCloud to test network performance by assigning a SJTU internal IP to it.
+
+We used the iperf test method instructed in the computer networking course, with the following test commands.
+
+Server side: \texttt{iperf -s -p 12313 }
+
+Client side: \texttt{iperf -c <hostname> -p 12313 -t 5 }
+
+The results are shown in table \ref{tbl:tcp}.
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{cccccc}
+\hline
+\multicolumn{6}{c}{virtio}                                                                                                         \\ \hline
+Peer VM                                                     & Virtual Bridge    & Host Interface    & Router  & jCloud  & Tokyo    \\ \hline
+4.63Gbps                                                    & \textbf{16.4Gbps} & \textbf{11.4Gbps} & 332Mbps & 232Mbps & 11.1Mbps \\ \hline
+\multicolumn{6}{c}{e1000}                                                                                                          \\ \hline
+Peer VM                                                     & Virtual Bridge    & Host Interface    & Router  & jCloud  & Tokyo    \\ \hline
+4.63Gbps                                                    & 4.76Gbps          & 3.4Gbps           & 329Mbps & 233Mbps & 12.7Mbps \\ \hline
+\multicolumn{6}{c}{Hosts}                                                                                                          \\ \hline
+VM                                                     & Virtual Bridge    & Host Interface    & Router  & jCloud  & Tokyo    \\ \hline
+\begin{tabular}[c]{@{}c@{}}14.8Gbps\\ 1.82Gbps\end{tabular} & 26.9Gbps          & 26.9Gbps          & 340Mbps & 256Mbps & 100Mbps  \\ \hline
+\end{tabular}
+\caption{Bandwidth test results}\label{tbl:tcp}
+\end{table}
+
+It is easy to see that while both virtualization methods are difficult to compare to real NICs, both show good performance for real network environments. However, virtio's performance has better throughput performance than e1000 under very high network conditions. e1000 performance peaks at around 5Gbps, while virtio peaks at around 17Gbps. Based on past data, VMware's proprietary virtual NIC appliance provided in its Tier 1 Hypervisor product, ESXi, has a peak performance of around 10Gbps, indicating that virtio itself is already strong enough to be used in an industrial grade network facility.
